@@ -1,0 +1,4 @@
+aws_lambda_function_name: aws-lambda-scheduled
+aws_lambda_scheduled_rule_name: "{{ aws_lambda_function_name }}-schedule-rule"
+aws_lambda_scheduled_rule_description: Run my function every 5 minutes
+aws_lambda_scheduled_rule_expression: 'rate(5 minutes)'

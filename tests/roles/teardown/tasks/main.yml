@@ -1,0 +1,40 @@
+- name: Set connection details
+  set_fact:
+    aws_connection_info: &aws_connection_info
+      region: "{{ aws_lambda_region|default(omit) }}"
+      profile: "{{ aws_lambda_profile|default(omit) }}"
+      access_key: "{{ aws_lambda_access_key|default(omit) }}"
+      secret_key: "{{ aws_lambda_secret_key|default(omit) }}"
+      security_token: "{{ aws_lambda_security_token|default(omit) }}"
+  no_log: yes
+
+- block:
+    - name: remove subnets
+      ec2_vpc_subnet:
+        tags: "{{ item.tags }}"
+        az: "{{ item.az }}"
+        cidr: "{{ item.cidr }}"
+        vpc_id: "{{ ec2_vpc_net_result.vpc.id }}"
+        state: absent
+        <<: *aws_connection_info
+      with_items: "{{ aws_lambda_test_subnets }}"
+      ignore_errors: no
+
+    - name: remove security group
+      ec2_group:
+        name: "{{ aws_lambda_test_group.name }}"
+        tags: "{{ aws_lambda_test_group.tags }}"
+        vpc_id: "{{ ec2_vpc_net_result.vpc.id }}"
+        state: absent
+        <<: *aws_connection_info
+      ignore_errors: no
+
+    - name: remove VPC
+      ec2_vpc_net:
+        cidr_block: "{{ aws_lambda_test_vpc.cidr }}"
+        name: "{{ aws_lambda_test_vpc.name }}"
+        state: absent
+        <<: *aws_connection_info
+      register: ec2_vpc_net_result
+      ignore_errors: no
+  when: aws_lambda_test_vpc is defined

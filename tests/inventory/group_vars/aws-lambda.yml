@@ -1,0 +1,10 @@
+aws_lambda_handler: my_function.handler
+aws_lambda_runtime: python3.6
+aws_lambda_iam_role: "{{ aws_lambda_function_name }}-iam-role"
+aws_lambda_iam_role_policy: "{{ lookup('file', inventory_dir + '/../files/' + aws_lambda_function_name + '-policy.json', convert_data=False) }}"
+aws_lambda_iam_role_trust_policy: "{{ lookup('file', inventory_dir + '/../files/' + aws_lambda_function_name + '-trust-policy.json', convert_data=False) }}"
+aws_lambda_environment:
+  ENVIRONMENT: test
+  HELLO: world
+  NAME: "{{ aws_lambda_function_name }}"
+aws_lambda_zip_file: "{{ inventory_dir }}/../files/my_function.zip"

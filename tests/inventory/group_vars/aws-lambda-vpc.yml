@@ -1,0 +1,33 @@
+aws_lambda_function_name: aws-lambda-vpc
+
+aws_lambda_vpc_security_group_filters:
+  tag:Environment: test
+  tag:Application: my_function
+aws_lambda_vpc_subnet_filters:
+  tag:Environment: test
+  tag:Application: my_function
+
+aws_lambda_test_vpc:
+  cidr: 10.99.99.0/24
+  name: aws-lambda-vpc
+
+aws_lambda_test_tags: &aws_lambda_test_tags
+  Environment: test
+  Application: my_function
+
+aws_lambda_test_group:
+  name: aws-lambda-vpc-sg
+  tags: "{{ aws_lambda_test_tags }}"
+  description: "Security Group for AWS Lambda Test"
+
+aws_lambda_test_subnets:
+  - az: "{{ aws_lambda_region|default }}a"
+    tags:
+      Name: aws-lambda-subnet-a
+      <<: *aws_lambda_test_tags
+    cidr: 10.99.99.0/25
+  - az: "{{ aws_lambda_region|default }}b"
+    tags:
+      Name: aws-lambda-subnet-b
+      <<: *aws_lambda_test_tags
+    cidr: 10.99.99.128/25

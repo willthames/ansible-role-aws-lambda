@@ -22,14 +22,14 @@
       pause: seconds=10
       when: aws_lambda_iam_role_result.changed
 
-    - name: Assign IAM policy to CloudFront role
+    - name: Assign IAM policy to role
       iam_policy:
         <<: *aws_connection_info
         iam_type: role
         iam_name: "{{ aws_lambda_iam_role }}"
         policy_name: "{{ aws_lambda_iam_role }}-policy"
         state: present
-        policy_document: "{{ aws_lambda_iam_role_policy }}"
+        policy_json: "{{ aws_lambda_iam_role_policy }}"
   when: aws_lambda_iam_role_policy and aws_lambda_iam_role_trust_policy
 
 - block:
@@ -41,13 +41,13 @@
 
     - name: set security_group_ids fact
       set_fact:
-        aws_lambda_vpc_security_group_ids: "{{ ec2_group_facts_result.groups|json_query('[].id') }}"
+        aws_lambda_vpc_security_group_ids: "{{ ec2_group_facts_result.security_groups|json_query('[].group_id') }}"
 
   when: aws_lambda_vpc_security_group_filters
 
 - block:
     - name: Find VPC subnets
-      aws_vpc_subnet_facts:
+      ec2_vpc_subnet_facts:
         <<: *aws_connection_info
         filters: "{{ aws_lambda_vpc_subnet_filters }}"
       register: aws_vpc_subnet_results
@@ -73,7 +73,7 @@
     vpc_subnet_ids: "{{ aws_lambda_vpc_subnet_ids|default(omit) }}"
     environment_variables: "{{ aws_lambda_environment }}"
     state: present
-  register: "{{ aws_lambda_result }}"
+  register: aws_lambda_result
 
 - block:
     - name: Create a scheduled cloudwatch event
@@ -100,7 +100,7 @@
         source_arn: "{{ aws_lambda_schedule_rule_result.rule.arn }}"
   when: aws_lambda_schedule_rule_name and aws_lambda_schedule_rule_expression
 
-  name: subscribe lambda to SNS topic
+- name: subscribe lambda to SNS topic
   sns_topic:
     <<: *aws_connection_info
     name: "{{ aws_lambda_sns_topic_name }}"

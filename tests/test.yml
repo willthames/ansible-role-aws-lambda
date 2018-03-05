@@ -1,8 +1,13 @@
----
-- hosts: aws-lambda-test-runner
+# ansible-playbook test.yml -vv
+
+- hosts: runner
+  max_fail_percentage: 1
   tasks:
-    block:
-      - include_role: setup
-      - include_role: aws-lambda
-    always:
-      - include_role: teardown
+    - block:
+        - include_role:
+            name: setup
+        - include_role:
+            name: aws-lambda
+      always:
+        - include_role:
+            name: teardown

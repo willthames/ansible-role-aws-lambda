@@ -1,5 +1,18 @@
-[aws-lambda-test]
-aws-lambda-test-runner
+[aws-lambda:children]
+aws-lambda-simple
+aws-lambda-scheduled
+aws-lambda-vpc
+
+[aws-lambda-simple]
+aws-lambda-simple-runner
+
+[aws-lambda-vpc]
+aws-lambda-vpc-runner
+
+[aws-lambda-scheduled]
+aws-lambda-scheduled-runner
 
 [runner]
-aws-lambda-test-runner
+aws-lambda-simple-runner
+aws-lambda-vpc-runner
+aws-lambda-scheduled-runner
