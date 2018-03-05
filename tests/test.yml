@@ -1,0 +1,8 @@
+---
+- hosts: aws-lambda-test-runner
+  tasks:
+    block:
+      - include_role: setup
+      - include_role: aws-lambda
+    always:
+      - include_role: teardown

@@ -1,0 +1,5 @@
+[aws-lambda-test]
+aws-lambda-test-runner
+
+[runner]
+aws-lambda-test-runner

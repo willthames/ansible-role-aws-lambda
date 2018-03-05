@@ -1,0 +1,114 @@
+- name: Set connection details
+  set_fact:
+    aws_connection_info: &aws_connection_info
+      region: "{{ aws_lambda_region|default(omit) }}"
+      profile: "{{ aws_lambda_profile|default(omit) }}"
+      access_key: "{{ aws_lambda_access_key|default(omit) }}"
+      secret_key: "{{ aws_lambda_secret_key|default(omit) }}"
+      security_token: "{{ aws_lambda_security_token|default(omit) }}"
+  no_log: yes
+
+- block:
+    - name: Create a role for attaching to the Lambda
+      iam_role:
+        <<: *aws_connection_info
+        name: "{{ aws_lambda_iam_role }}"
+        assume_role_policy_document: "{{ aws_lambda_iam_role_trust_policy }}"
+        state: present
+      register: aws_lambda_iam_role_result
+
+    # See this http://stackoverflow.com/questions/36419442/the-role-defined-for-the-function-cannot-be-assumed-by-lambda
+    - name: sleeping for 10 sec for the role to be available.
+      pause: seconds=10
+      when: aws_lambda_iam_role_result.changed
+
+    - name: Assign IAM policy to CloudFront role
+      iam_policy:
+        <<: *aws_connection_info
+        iam_type: role
+        iam_name: "{{ aws_lambda_iam_role }}"
+        policy_name: "{{ aws_lambda_iam_role }}-policy"
+        state: present
+        policy_document: "{{ aws_lambda_iam_role_policy }}"
+  when: aws_lambda_iam_role_policy and aws_lambda_iam_role_trust_policy
+
+- block:
+    - name: find security groups
+      ec2_group_facts:
+        <<: *aws_connection_info
+        filters: "{{ aws_lambda_vpc_security_group_filters }}"
+      register: ec2_group_facts_result
+
+    - name: set security_group_ids fact
+      set_fact:
+        aws_lambda_vpc_security_group_ids: "{{ ec2_group_facts_result.groups|json_query('[].id') }}"
+
+  when: aws_lambda_vpc_security_group_filters
+
+- block:
+    - name: Find VPC subnets
+      aws_vpc_subnet_facts:
+        <<: *aws_connection_info
+        filters: "{{ aws_lambda_vpc_subnet_filters }}"
+      register: aws_vpc_subnet_results
+
+    - name: set security_group_ids fact
+      set_fact:
+        aws_lambda_vpc_subnet_ids: "{{ aws_vpc_subnet_results.subnets|json_query('[].id') }}"
+
+  when: aws_lambda_vpc_subnet_filters
+
+- name: Create Lambda function
+  lambda:
+    <<: *aws_connection_info
+    name: "{{ aws_lambda_function_name }}"
+    runtime: "{{ aws_lambda_runtime }}"
+    timeout: "{{ aws_lambda_timeout }}"
+    role: "{{ aws_lambda_iam_role }}"
+    handler: "{{ aws_lambda_handler }}"
+    zip_file: "{{ aws_lambda_zip_file|default(omit) }}"
+    s3_bucket: "{{ aws_lambda_s3_bucket|default(omit) }}"
+    s3_key: "{{ aws_lambda_s3_key|default(omit) }}"
+    vpc_security_group_ids: "{{ aws_lambda_vpc_security_group_ids|default(omit) }}"
+    vpc_subnet_ids: "{{ aws_lambda_vpc_subnet_ids|default(omit) }}"
+    environment_variables: "{{ aws_lambda_environment }}"
+    state: present
+  register: "{{ aws_lambda_result }}"
+
+- block:
+    - name: Create a scheduled cloudwatch event
+      cloudwatchevent_rule:
+        <<: *aws_connection_info
+        name: "{{ aws_lambda_schedule_rule_name }}"
+        description: "{{ aws_lambda_schedule_description|default(omit) }}"
+        targets:
+          - id: "{{ aws_lambda_result.configuration.function_name }}"
+            # Strip off the version number from the arn
+            arn: "{{ (aws_lambda_result.configuration.function_arn.split(':')[:-1])|join(':') }}"
+        schedule_expression: "{{ aws_lambda_schedule_rule_expression }}"
+        state: present
+      register: aws_lambda_schedule_rule_result
+
+    - name: create lambda policy to allow aws events to invoke it
+      lambda_policy:
+        <<: *aws_connection_info
+        state: present
+        function_name: "{{ aws_lambda_result.configuration.function_name }}"
+        statement_id: "{{ aws_lambda_result.configuration.function_name }}"
+        action: "lambda:InvokeFunction"
+        principal: events.amazonaws.com
+        source_arn: "{{ aws_lambda_schedule_rule_result.rule.arn }}"
+  when: aws_lambda_schedule_rule_name and aws_lambda_schedule_rule_expression
+
+  name: subscribe lambda to SNS topic
+  sns_topic:
+    <<: *aws_connection_info
+    name: "{{ aws_lambda_sns_topic_name }}"
+    display_name: "{{ aws_lambda_sns_topic_display_name|default(aws_lambda_sns_topic_name }}"
+    state: present
+    purge_subscriptions: False
+    subscriptions:
+      - endpoint: "{{ aws_lambda_result.configuration.function_arn}}"
+        protocol: lambda
+    region: "{{ aws_lambda_sns_topic_region|default(aws_lambda_region) }}"
+  when: aws_lambda_sns_topic_name
