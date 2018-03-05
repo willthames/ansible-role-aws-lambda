@@ -1,4 +1,4 @@
-# ansible-playbook test.yml -vv
+# ansible-playbook test.yml -vv -e aws_lambda_region=us-east-2 -e aws_lambda_profile=my_profile
 
 - hosts: runner
   max_fail_percentage: 1

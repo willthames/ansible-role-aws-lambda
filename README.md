@@ -18,7 +18,7 @@ Role Variables
 * `aws_lambda_runtime` - Runtime used by the lambda. Mandatory
 * `aws_lambda_timeout` - Timeout in seconds. Defaults to 30
 * `aws_lambda_memory` - Maximum memory allowed. Defaults to 128MB
-* `aws_lambda_iam_role_name` - Name of the IAM role used by the Lambda. Mandatory
+* `aws_lambda_iam_role` - Name of the IAM role used by the Lambda. Mandatory
 * `aws_lambda_iam_role_policy` - JSON policy document for the IAM role.
   Required if the role doesn't yet exist.
 * `aws_lambda_iam_role_trust_policy` - JSON trust policy document for the IAM role.
@@ -63,7 +63,7 @@ Example Playbook
         aws_lambda_function_name: my_function
         aws_lambda_handler: my_function.handler
         aws_lambda_runtime: python3.6
-        aws_lambda_iam_role_name: my-function-iam-role
+        aws_lambda_iam_role: my-function-iam-role
         aws_lambda_iam_role_policy: "{{ lookup('template', 'policy.json', convert_data=False) }}"
         aws_lambda_iam_role_trust_policy: "{{ lookup('template', 'trust-policy.json', convert_data=False) }}"
         aws_lambda_vpc_security_group_filters:
