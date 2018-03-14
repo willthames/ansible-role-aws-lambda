@@ -35,11 +35,11 @@ Role Variables
 * `aws_lambda_vpc_subnet_ids` - List of subnet IDs the Lambda belongs to, if the Lambda should be in a VPC.
 * `aws_lambda_vpc_subnet_filters` - A dictionary of filters that can be used to search for the Lambda
   subnets. An alternative to specifying subnet IDs.
-* `aws_lambda_scheduled_rule_name` - Name of scheduled rule to create/update (if needed). Required if
-  `aws_lambda_scheduled_rule_expression` is set.
-* `aws_lambda_scheduled_rule_description` - Optional description of scheduled rule
-* `aws_lambda_scheduled_rule_expression` - Scheduled expression for scheduled rule. Required if
-  `aws_lambda_scheduled_rule_name` is set.
+* `aws_lambda_schedule_rule_name` - Name of scheduled rule to create/update (if needed). Required if
+  `aws_lambda_schedule_rule_expression` is set.
+* `aws_lambda_schedule_rule_description` - Optional description of scheduled rule
+* `aws_lambda_schedule_rule_expression` - Scheduled expression for scheduled rule. Required if
+  `aws_lambda_schedule_rule_name` is set.
 * `aws_lambda_region` - AWS region containing the Lambda. Needs to be set if not set elsewhere (e.g. environment
   variable, `.aws/config` etc.)
 * `aws_lambda_profile` - boto profile used to connect to AWS. An alternative to environment variables.
@@ -77,9 +77,9 @@ Example Playbook
           HELLO: world
         aws_lambda_s3_bucket: my_lambda_bucket
         aws_lambda_s3_key: path/to/my_function.zip
-        aws_lambda_scheduled_rule_name: my-function-schedule-rule
-        aws_lambda_scheduled_rule_description: Run my function every 5 minutes
-        aws_lambda_scheduled_rule_expression: 'rate(5 minutes)'
+        aws_lambda_schedule_rule_name: my-function-schedule-rule
+        aws_lambda_schedule_rule_description: Run my function every 5 minutes
+        aws_lambda_schedule_rule_expression: 'rate(5 minutes)'
 
       roles:
          - aws-lambda

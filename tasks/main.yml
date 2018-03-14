@@ -80,7 +80,7 @@
       cloudwatchevent_rule:
         <<: *aws_connection_info
         name: "{{ aws_lambda_schedule_rule_name }}"
-        description: "{{ aws_lambda_schedule_description|default(omit) }}"
+        description: "{{ aws_lambda_schedule_rule_description|default(omit) }}"
         targets:
           - id: "{{ aws_lambda_result.configuration.function_name }}"
             # Strip off the version number from the arn
