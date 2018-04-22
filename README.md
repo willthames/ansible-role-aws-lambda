@@ -28,9 +28,7 @@ Role Variables
 * `aws_lambda_s3_bucket` - S3 bucket containing the lambda. Mutually exclusive with `aws_lambda_zip_file`
 * `aws_lambda_s3_key` - Key of the S3 object containing the lambda. Mutually exclusive with `aws_lambda_zip_file`
 * `aws_lambda_environment` - a dictionary of environment variables
-* `aws_lambda_vpc_security_group_ids` - List of security group IDs the Lambda belongs to, if the Lambda
-  should be in a VPC.
-* `aws_lambda_vpc_security_group_filters` - A dictionary of filters that can be used to search for the Lambda
+* `aws_lambda_vpc_security_group_ids` - List of security group IDs the Lambda belongs to, if the Lambda should be in a VPC.  * `aws_lambda_vpc_security_group_filters` - A dictionary of filters that can be used to search for the Lambda
   security groups. An alternative to specifying security group IDs.
 * `aws_lambda_vpc_subnet_ids` - List of subnet IDs the Lambda belongs to, if the Lambda should be in a VPC.
 * `aws_lambda_vpc_subnet_filters` - A dictionary of filters that can be used to search for the Lambda
@@ -46,6 +44,10 @@ Role Variables
 * `aws_lambda_access_key` - AWS access key. An alternative to environment variables or profile.
 * `aws_lambda_secret_key` - AWS secret key. An alternative to environment variables or profile.
 * `aws_lambda_security_token` - AWS security token. An alternative to environment variables or profile.
+* `aws_lambda_sns_topic_name` - Name of SNS topic to which the lambda subscribes
+* `aws_lambda_sns_topic_display_name` - Friendly name of SNS topic to which the lambda subscribes
+* `aws_lambda_sns_topic_region` - Region in which the SNS topic resides (defaults to `aws_lambda_region`)
+
 
 ### Output
 
