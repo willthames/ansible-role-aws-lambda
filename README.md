@@ -5,8 +5,17 @@ A generic role for managing AWS Lambda functions
 
 Requirements
 ------------
+If you wish to subscribe your Lambda to a topic belonging
+to another SNS account, you'll need to use `sns_topic`
+from https://github.com/ansible/ansible/pull/39292. Hopefully
+that'll make it into Ansible 2.6.
 
-boto3
+[Instructions for using unreleased modules](https://willthames.github.io/2017/12/12/using-updated-modules-with-stable-ansible.html)
+
+
+* boto3
+* botocore
+* boto
 
 Role Variables
 --------------
@@ -28,9 +37,7 @@ Role Variables
 * `aws_lambda_s3_bucket` - S3 bucket containing the lambda. Mutually exclusive with `aws_lambda_zip_file`
 * `aws_lambda_s3_key` - Key of the S3 object containing the lambda. Mutually exclusive with `aws_lambda_zip_file`
 * `aws_lambda_environment` - a dictionary of environment variables
-* `aws_lambda_vpc_security_group_ids` - List of security group IDs the Lambda belongs to, if the Lambda
-  should be in a VPC.
-* `aws_lambda_vpc_security_group_filters` - A dictionary of filters that can be used to search for the Lambda
+* `aws_lambda_vpc_security_group_ids` - List of security group IDs the Lambda belongs to, if the Lambda should be in a VPC.  * `aws_lambda_vpc_security_group_filters` - A dictionary of filters that can be used to search for the Lambda
   security groups. An alternative to specifying security group IDs.
 * `aws_lambda_vpc_subnet_ids` - List of subnet IDs the Lambda belongs to, if the Lambda should be in a VPC.
 * `aws_lambda_vpc_subnet_filters` - A dictionary of filters that can be used to search for the Lambda
@@ -46,6 +53,11 @@ Role Variables
 * `aws_lambda_access_key` - AWS access key. An alternative to environment variables or profile.
 * `aws_lambda_secret_key` - AWS secret key. An alternative to environment variables or profile.
 * `aws_lambda_security_token` - AWS security token. An alternative to environment variables or profile.
+* `aws_lambda_sns_topic_name` - Name of SNS topic to which the lambda subscribes
+* `aws_lambda_sns_topic_display_name` - Friendly name of SNS topic to which the lambda subscribes. Do not set
+  this if using a SNS topic outside of the AWS account that you're running this module against.
+* `aws_lambda_sns_topic_region` - Region in which the SNS topic resides (defaults to `aws_lambda_region`)
+
 
 ### Output
 
