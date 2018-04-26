@@ -98,14 +98,16 @@
         action: "lambda:InvokeFunction"
         principal: events.amazonaws.com
         source_arn: "{{ aws_lambda_schedule_rule_result.rule.arn }}"
-  when: aws_lambda_schedule_rule_name and aws_lambda_schedule_rule_expression
+  when:
+    - aws_lambda_schedule_rule_name != ""
+    - aws_lambda_schedule_rule_expression != ""
 
 - block:
     - name: subscribe lambda to SNS topic
       sns_topic:
         <<: *aws_connection_info
         name: "{{ aws_lambda_sns_topic_name }}"
-        display_name: "{{ aws_lambda_sns_topic_display_name|default(aws_lambda_sns_topic_name) }}"
+        display_name: "{{ aws_lambda_sns_topic_display_name|default() }}"
         state: present
         purge_subscriptions: False
         subscriptions:
@@ -118,7 +120,7 @@
         <<: *aws_connection_info
         state: present
         function_name: "{{ aws_lambda_result.configuration.function_name }}"
-        statement_id: "{{ aws_lambda_sns_topic_display_name|replace(' ', '') }}"
+        statement_id: "{{ ((aws_lambda_sns_topic_name.split(':')[-1]).split('-'))|map('capitalize')|join('') }}"
         action: "lambda:InvokeFunction"
         principal: sns.amazonaws.com
         source_arn: "{{ aws_lambda_sns_topic_name }}"
