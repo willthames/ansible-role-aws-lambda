@@ -34,7 +34,7 @@
 
 - block:
     - name: find security groups
-      ec2_group_facts:
+      ec2_group_info:
         <<: *aws_connection_info
         filters: "{{ aws_lambda_vpc_security_group_filters }}"
       register: ec2_group_facts_result
@@ -47,7 +47,7 @@
 
 - block:
     - name: Find VPC subnets
-      ec2_vpc_subnet_facts:
+      ec2_vpc_subnet_info:
         <<: *aws_connection_info
         filters: "{{ aws_lambda_vpc_subnet_filters }}"
       register: aws_vpc_subnet_results
